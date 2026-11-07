@@ -8,12 +8,11 @@ window.KHODIYAR = {
     name: "Khodiyar Restaurant",
     phoneDisplay: "+91 97239 51073",
     phoneLink: "tel:+919723951073",
-    whatsapp: "https://wa.me/919723951073",   // orders and chats go to this number
+    whatsapp: "https://wa.me/919723951073",   // dine-in orders and chats go to this number
     whatsappText: "Hello Khodiyar Restaurant! ",
-    orderTypes: ["Dine-in", "Takeaway", "Delivery"],  // remove one to hide it in the order form
     email: "officialkhodiyar@gmail.com",
     googleReview: "https://g.page/r/CQC4Lfe8KjY_EBM/review",
-    // TODO: replace with your exact Zomato restaurant page link
+    // Delivery is only through Zomato. TODO: replace with your exact Zomato restaurant page link
     zomato: "https://www.zomato.com/"
   },
 

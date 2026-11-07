@@ -213,33 +213,37 @@
     onScroll();
   }
 
-  /* ================= ORDER CART ================= */
-  var cart = store("khodiyar-cart") || {};
+  /* ================= DINE-IN ORDER CART ================= */
+  // Orders placed here are for guests sitting at a table. Delivery is through Zomato only.
+  var CART_HOURS = 6; // an unsent order is forgotten after this many hours
+  var saved = store("khodiyar-cart") || {};
+  var cart = {};
+  if (saved.items && saved.t && Date.now() - saved.t < CART_HOURS * 3600e3) cart = saved.items;
   Object.keys(cart).forEach(function (k) { if (!CAT[k] || !(cart[k] > 0)) delete cart[k]; });
-  var details = store("khodiyar-details") || {};
-  var types = C.orderTypes && C.orderTypes.length ? C.orderTypes : ["Dine-in", "Takeaway", "Delivery"];
-  if (types.indexOf(details.type) === -1) details.type = types[0];
+  var details = { name: (store("khodiyar-details") || {}).name || "", table: "", notes: "" };
+  try { details.table = sessionStorage.getItem("khodiyar-table") || ""; } catch (e) { /* ignore */ }
 
   // table number from the QR link: menu.html?table=5 or menu.html#table-5
-  var tableFromLink = null;
   try {
     var qs = new URLSearchParams(location.search).get("table");
     var hm = /^#table-?(\w+)$/i.exec(location.hash);
-    tableFromLink = qs || (hm && hm[1]) || null;
+    var fromLink = qs || (hm && hm[1]);
+    if (fromLink) details.table = String(fromLink).slice(0, 10);
   } catch (e) { /* ignore */ }
-  if (tableFromLink && types.indexOf("Dine-in") !== -1) {
-    details.type = "Dine-in";
-    details.table = String(tableFromLink).slice(0, 10);
+  function showTableNote() {
     var tn = $("#table-note");
-    if (tn) { tn.hidden = false; $("b", tn).textContent = details.table; }
+    if (!tn) return;
+    tn.hidden = !details.table;
+    $("b", tn).textContent = details.table;
   }
+  showTableNote();
 
   /* drawer + bar + toast markup */
   var shell = document.createElement("div");
   shell.innerHTML =
     '<div class="overlay" id="overlay"></div>' +
     '<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title">' +
-      '<div class="drawer-head"><div style="display:grid;gap:6px"><span class="kicker">Your little order of goodness</span>' +
+      '<div class="drawer-head"><div style="display:grid;gap:6px"><span class="kicker">Dine-in order</span>' +
         '<h2 id="drawer-title">Your order <span>✳</span></h2></div>' +
         '<button class="icon-btn" id="drawer-close" type="button" aria-label="Close your order">' + ICON.close + "</button></div>" +
       '<div class="drawer-body">' +
@@ -247,23 +251,20 @@
         '<div class="cart-empty" id="cart-empty"><strong>Nothing here yet</strong><span>Add dishes from the menu and send your order to us on WhatsApp.</span>' +
           '<a class="btn btn-dark btn-sm" href="menu.html" id="empty-browse">Browse the menu</a></div>' +
         '<form class="order-form" id="order-form" novalidate>' +
-          '<span class="form-title">How would you like it?</span>' +
-          '<div class="seg" style="--n:' + types.length + '" role="radiogroup" aria-label="Order type">' +
-            types.map(function (t) { return '<label><input type="radio" name="otype" value="' + esc(t) + '"><span>' + esc(t) + "</span></label>"; }).join("") +
-          "</div>" +
+          '<span class="form-title">Your table</span>' +
           '<div class="row2">' +
-            '<div class="field" data-f="name"><label for="o-name">Your name</label><input id="o-name" name="name" autocomplete="name" placeholder="Full name"><span class="err" hidden>Please add your name.</span></div>' +
-            '<div class="field" data-f="phone"><label for="o-phone">Phone <small>(optional)</small></label><input id="o-phone" name="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="10-digit mobile"><span class="err" hidden>Use a 10-digit number.</span></div>' +
+            '<div class="field" data-f="table"><label for="o-table">Table number</label><input id="o-table" name="table" autocomplete="off" placeholder="e.g. 5"><span class="err" hidden>Please add your table number.</span></div>' +
+            '<div class="field" data-f="name"><label for="o-name">Your name <small>(optional)</small></label><input id="o-name" name="name" autocomplete="given-name" placeholder="First name"></div>' +
           "</div>" +
-          '<div class="field" data-f="table" data-for="Dine-in"><label for="o-table">Table number</label><input id="o-table" name="table" inputmode="numeric" placeholder="e.g. 5"><span class="err" hidden>Please add your table number.</span></div>' +
-          '<div class="field" data-f="address" data-for="Delivery"><label for="o-address">Delivery address</label><textarea id="o-address" name="address" autocomplete="street-address" placeholder="House no., street, area, landmark"></textarea><span class="err" hidden>Please add your delivery address.</span></div>' +
-          '<div class="field" data-f="time" data-for="Takeaway"><label for="o-time">Pickup time <small>(optional)</small></label><input id="o-time" name="time" placeholder="e.g. 8:30 pm"></div>' +
           '<div class="field" data-f="notes"><label for="o-notes">Notes <small>(optional)</small></label><textarea id="o-notes" name="notes" placeholder="Less spicy, Jain, no onion-garlic…"></textarea></div>' +
+          '<div class="notice" role="note"><strong>For dine-in only</strong>' +
+            "<span>Orders sent from here are served at your table. We don't deliver them. For delivery, please order on Zomato.</span>" +
+            '<a href="' + esc(C.zomato) + '" target="_blank" rel="noopener">Order delivery on Zomato ↗</a></div>' +
         "</form>" +
       "</div>" +
       '<div class="drawer-foot">' +
         '<div class="subtotal"><span>Items total</span><strong id="subtotal">₹0</strong></div>' +
-        '<p class="fine">No online payment. We reply on WhatsApp to confirm your order, the final total and timing.</p>' +
+        '<p class="fine">No online payment. We confirm your order on WhatsApp and serve it at your table.</p>' +
         '<a class="btn btn-wa btn-block send-btn" id="send" href="#" target="_blank" rel="noopener">' + ICON.chat + " Send order on WhatsApp</a>" +
         '<button class="clear-link" id="clear" type="button">Clear order</button>' +
       "</div>" +
@@ -359,7 +360,7 @@
     renderLines();
     renderBar();
     updateSendLink();
-    store("khodiyar-cart", cart);
+    store("khodiyar-cart", { items: cart, t: Date.now() });
   }
 
   function change(key, d) {
@@ -367,7 +368,7 @@
     var q = (cart[key] || 0) + d;
     if (q <= 0) delete cart[key]; else cart[key] = Math.min(q, 99);
     renderAll();
-    if (d > 0) {
+    if (d > 0 && !drawer.classList.contains("open")) {
       $$(".cart-btn").forEach(function (b) { b.classList.remove("bump"); void b.offsetWidth; b.classList.add("bump"); });
       if ((cart[key] || 0) === 1) toast("Added <b>" + esc(CAT[key].name) + "</b>");
     }
@@ -382,18 +383,9 @@
   $("#clear").addEventListener("click", function () { cart = {}; renderAll(); toast("Order cleared"); });
 
   /* order form */
-  var fields = { name: $("#o-name"), phone: $("#o-phone"), table: $("#o-table"), address: $("#o-address"), time: $("#o-time"), notes: $("#o-notes") };
+  var fields = { table: $("#o-table"), name: $("#o-name"), notes: $("#o-notes") };
   Object.keys(fields).forEach(function (k) { if (details[k]) fields[k].value = details[k]; });
-  $$('input[name="otype"]', form).forEach(function (r) { r.checked = r.value === details.type; });
 
-  function applyType() {
-    $$("[data-for]", form).forEach(function (f) { f.hidden = f.getAttribute("data-for") !== details.type; });
-  }
-  applyType();
-  form.addEventListener("change", function (e) {
-    if (e.target.name === "otype") { details.type = e.target.value; applyType(); }
-    saveDetails();
-  });
   form.addEventListener("input", function (e) {
     var f = e.target.closest(".field");
     if (f) { f.classList.remove("bad"); var er = $(".err", f); if (er) er.hidden = true; }
@@ -401,31 +393,22 @@
   });
   function saveDetails() {
     Object.keys(fields).forEach(function (k) { details[k] = fields[k].value.trim(); });
-    store("khodiyar-details", { type: details.type, name: details.name, phone: details.phone, address: details.address });
+    details.table = details.table.slice(0, 10);
+    store("khodiyar-details", { name: details.name });
+    try { sessionStorage.setItem("khodiyar-table", details.table); } catch (e) { /* ignore */ }
+    showTableNote();
     updateSendLink();
-  }
-  function cleanPhone(v) {
-    var d = (v || "").replace(/\D/g, "");
-    if (d.length === 12 && d.indexOf("91") === 0) d = d.slice(2);
-    if (d.length === 11 && d.charAt(0) === "0") d = d.slice(1);
-    return d;
   }
 
   function buildMessage() {
-    var lines = ["Hello Khodiyar Restaurant! 🙏", "I'd like to place an order:", ""];
+    var lines = ["Hello Khodiyar Restaurant! 🙏", "Dine-in order" + (details.table ? " for Table " + details.table : "") + ":", ""];
     var i = 1;
     Object.keys(cart).forEach(function (k) {
       lines.push(i++ + ". " + CAT[k].name + " × " + cart[k] + " — " + rupees(CAT[k].price * cart[k]));
     });
     lines.push("", "Items total: " + rupees(subtotal()));
-    var type = details.type;
-    if (type === "Dine-in") lines.push("Order type: Dine-in" + (details.table ? " (Table " + details.table + ")" : ""));
-    else lines.push("Order type: " + type);
-    if (type === "Delivery" && details.address) lines.push("Address: " + details.address);
-    if (type === "Takeaway" && details.time) lines.push("Pickup time: " + details.time);
+    lines.push("Table: " + (details.table || "-"));
     if (details.name) lines.push("Name: " + details.name);
-    var ph = cleanPhone(details.phone);
-    if (ph) lines.push("Phone: " + ph);
     if (details.notes) lines.push("Notes: " + details.notes.slice(0, 400));
     lines.push("", "Please confirm my order. Thank you!");
     return lines.join("\n");
@@ -434,11 +417,7 @@
 
   function validate() {
     var bad = [];
-    var need = { name: !!details.name };
-    if (details.type === "Dine-in") need.table = !!details.table;
-    if (details.type === "Delivery") need.address = !!details.address;
-    var ph = cleanPhone(details.phone);
-    need.phone = !details.phone || ph.length === 10;
+    var need = { table: !!details.table };
     Object.keys(need).forEach(function (k) {
       var f = $('[data-f="' + k + '"]', form);
       var ok = need[k];
@@ -452,7 +431,7 @@
     saveDetails();
     if (!count()) { e.preventDefault(); toast("Add a dish first"); return; }
     var bad = validate();
-    if (bad.length) { e.preventDefault(); bad[0].focus(); toast("Please fill in the highlighted details"); return; }
+    if (bad.length) { e.preventDefault(); bad[0].focus(); toast("Please add your table number"); return; }
     updateSendLink();
     toast("Opening WhatsApp. Tap <b>Send</b> there to place your order.");
   });
@@ -462,7 +441,7 @@
   fab.className = "fab";
   fab.innerHTML =
     '<div class="fab-menu" id="fab-menu">' +
-      '<a class="fab-item" target="_blank" rel="noopener" href="' + esc(waLink(C.whatsappText)) + '"><span class="i" style="background:var(--wa)">' + ICON.chat + "</span><span>WhatsApp us<small>Orders, tables &amp; questions</small></span></a>" +
+      '<a class="fab-item" target="_blank" rel="noopener" href="' + esc(waLink(C.whatsappText)) + '"><span class="i" style="background:var(--wa)">' + ICON.chat + "</span><span>WhatsApp us<small>Questions &amp; table bookings</small></span></a>" +
       '<a class="fab-item" href="' + C.phoneLink + '"><span class="i" style="background:var(--maroon)">' + ICON.call + "</span><span>Call us<small>" + esc(C.phoneDisplay) + "</small></span></a>" +
     "</div>" +
     '<button class="fab-main" type="button" aria-expanded="false" aria-controls="fab-menu" aria-label="Contact us on WhatsApp or phone">' +

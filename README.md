@@ -7,24 +7,27 @@ Static site, no build step. Two pages:
 
 ## How WhatsApp ordering works
 
-Customers tap **Add** on dishes, open **Your order**, choose Dine-in / Takeaway / Delivery,
-fill in their name (plus table number or address), and tap **Send order on WhatsApp**.
-WhatsApp opens with the full order typed out (items, quantities, total, order type, name, notes),
-addressed to the number in `config.whatsapp`. Nothing is paid online; you confirm on WhatsApp.
+WhatsApp ordering is **for dine-in only**. Orders are served at the table and never delivered;
+delivery is through Zomato only, and the site says so on the menu, in the order form and in the FAQs.
 
-The order is remembered on the customer's phone, so they can move between pages without losing it.
+Guests tap **Add** on dishes, open **Your order**, enter their **table number** (required),
+optionally their name and notes, and tap **Send order on WhatsApp**. WhatsApp opens with the
+order typed out (table, items, quantities, total, notes), addressed to `config.whatsapp`.
+Nothing is paid online.
+
+An unsent order is remembered on the guest's phone for 6 hours, so they can move between pages.
 
 ### Table QR codes
 
 Give each table its own QR code with the table number in the link, for example
-`https://your-domain/menu?table=5`. The menu then shows "Ordering for table 5" and fills it in for Dine-in.
+`https://your-domain/menu?table=5`. The menu then shows "Ordering for table 5" and fills in the table number.
 A plain `https://your-domain/menu` works too; the customer types the table number.
 
 ## Edit prices, dishes, settings
 
 Everything lives in `assets/js/menu-data.js`:
 
-- `config` — WhatsApp number, phone, email, Google review link, **Zomato link**, order types
+- `config` — WhatsApp number, phone, email, Google review link, **Zomato link**
 - `featured` — the six big dish cards on the home page
 - `menu` — every section and dish. `p` = price in ₹; `v` = two prices (Dry/Gravy, Plain/Butter); `tag: "special"` shows the House special badge
 - `photos` — Unsplash photo IDs
