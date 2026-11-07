@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Menu · Khodiyar Restaurant</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Full menu of Khodiyar Restaurant with prices in ₹. Add dishes and send your order on WhatsApp: dine-in, takeaway or delivery.">
+<meta name="theme-color" content="#1d1311">
+<meta property="og:title" content="Menu · Khodiyar Restaurant">
+<meta property="og:image" content="assets/img/og-image.jpg">
+<link rel="icon" type="image/png" href="assets/img/favicon.png">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://images.unsplash.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=Outfit:wght@700;800;900&family=Mukta+Vaani:wght@600&display=swap">
+<link rel="stylesheet" href="assets/css/style.css">
+<script>document.addEventListener("error",function(e){var t=e.target;if(t&&t.tagName==="IMG"){t.classList.add("is-broken")}},true);</script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="brand" href="index.html" aria-label="Khodiyar Restaurant home">
+      <span class="brand-disc"><img src="assets/img/logo-mark.png" width="240" height="204" alt=""></span>
+      <span class="brand-text"><span class="brand-name">Khodiyar</span><span class="brand-sub">RESTAURANT · PURE VEG</span></span>
+    </a>
+    <div class="bar-actions">
+      <a class="btn btn-ghost btn-sm hide-sm" href="index.html">Home</a>
+      <a class="btn btn-zomato btn-sm hide-sm" data-link="zomato" href="https://www.zomato.com/">Zomato</a>
+      <button class="cart-btn" type="button" data-open-cart aria-label="Open your order">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1.2 11.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8L5 8z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8" stroke-linecap="round"/></svg>
+        <span class="cart-count" hidden>0</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<section class="menu-hero dark">
+  <div class="wrap menu-hero-inner">
+    <span class="kicker">✦ <span class="gu" style="font-size:.95rem">મેનુ</span> Order on WhatsApp</span>
+    <h1>The <span class="hl">menu.</span></h1>
+    <span class="table-note" id="table-note" hidden>Ordering for table <b></b></span>
+    <div class="meta">
+      <span><span class="veg"></span>Pure vegetarian</span>
+      <span>Prices in ₹</span>
+      <span>Tap + to add, then send on WhatsApp</span>
+    </div>
+    <div class="search">
+      <svg class="s-ico" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+      <label class="sr-only" for="menu-search">Search dishes</label>
+      <input id="menu-search" type="search" placeholder="Search paneer, naan, khichdi…" autocomplete="off" enterkeyhint="search">
+      <button class="clear" id="search-clear" type="button" aria-label="Clear search" hidden>✕</button>
+    </div>
+  </div>
+</section>
+
+<div class="chips-bar">
+  <div class="wrap"><nav class="chips" id="chips" aria-label="Menu sections"></nav></div>
+</div>
+
+<main class="wrap menu-main">
+  <div id="menu-root" style="display:grid;gap:44px"></div>
+  <div class="empty" id="menu-empty" hidden>
+    <strong>No dishes match “<span data-q></span>”</strong>
+    Try paneer, naan, dal or khichdi.
+  </div>
+  <noscript><p class="empty"><strong>The menu could not load</strong>Please ask our staff for the printed menu.</p></noscript>
+
+  <section class="menu-cta dark">
+    <span class="kicker">Rather order on Zomato?</span>
+    <h2>Same menu, <span class="hl">delivered.</span></h2>
+    <div class="cta-actions">
+      <a class="btn btn-zomato" data-link="zomato" href="https://www.zomato.com/">Order on Zomato</a>
+      <a class="btn btn-ghost" data-link="review" href="https://g.page/r/CQC4Lfe8KjY_EBM/review">Review us on Google</a>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer dark" style="padding-block:28px calc(110px + env(safe-area-inset-bottom, 0px))">
+  <div class="wrap footer-bottom" style="margin-top:0;border-top:0;padding-top:0">
+    <span>© <span data-year>2026</span> Khodiyar Restaurant</span>
+    <a data-link="call" data-text="phone" href="tel:+919723951073">+91 97239 51073</a>
+    <a href="index.html">Back to home ↑</a>
+  </div>
+</footer>
+
+<script src="assets/js/menu-data.js"></script>
+<script src="assets/js/main.js"></script>
+</body>
+</html>
